@@ -1,4 +1,4 @@
-import { Model, Sequelize } from 'sequelize';
+import Sequelize, { Model } from 'sequelize';
 import bcrypt from 'bcryptjs';
 
 class User extends Model {
@@ -10,7 +10,9 @@ class User extends Model {
         password: Sequelize.VIRTUAL,
         password_hash: Sequelize.STRING,
       },
-      { sequelize }
+      {
+        sequelize,
+      }
     );
 
     this.addHook('beforeSave', async user => {
