@@ -58,11 +58,11 @@ class MeetupController {
     const meetup = await Meetup.findByPk(req.params.id);
 
     if (!meetup) {
-      return res.status(401).json({ error: 'Meetup not exist.' });
+      return res.status(401).json({ error: 'Meetup not found.' });
     }
 
     if (meetup.user_id !== user_id) {
-      return res.status(401).json({ error: 'Not authorized.' });
+      return res.status(401).json({ error: 'User not authorized.' });
     }
 
     if (isBefore(parseISO(req.body.date), new Date())) {
