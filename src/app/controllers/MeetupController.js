@@ -23,10 +23,12 @@ class MeetupController {
       include: [
         {
           model: User,
+          as: 'user',
           attributes: ['name', 'email'],
         },
         {
           model: File,
+          as: 'banner',
           attributes: ['name', 'path', 'url'],
         },
       ],
@@ -41,7 +43,9 @@ class MeetupController {
     const { date } = req.body;
 
     if (isBefore(parseISO(date), new Date())) {
-      return res.status(400).json({ error: 'Meetup date invalid.' });
+      return res
+        .status(400)
+        .json({ error: 'Não é possível criar um meetup com data passada' });
     }
 
     const meetup = await Meetup.create({
@@ -58,19 +62,17 @@ class MeetupController {
     const meetup = await Meetup.findByPk(req.params.id);
 
     if (!meetup) {
-      return res.status(401).json({ error: 'Meetup not found.' });
+      return res.status(401).json({ error: 'Meetup não encontrado' });
     }
 
     if (meetup.user_id !== user_id) {
-      return res.status(401).json({ error: 'User not authorized.' });
+      return res.status(401).json({ error: 'Usuário não autorizado' });
     }
 
-    if (isBefore(parseISO(req.body.date), new Date())) {
-      return res.status(400).json({ error: 'Meetup date invalid.' });
-    }
-
-    if (meetup.past) {
-      return res.status(400).json({ error: "Can't update past meetups." });
+    if (isBefore(parseISO(req.body.date), new Date()) || meetup.past) {
+      return res
+        .status(400)
+        .json({ error: 'Não é possível atualizar um meetup com data passada' });
     }
 
     await meetup.update(req.body);
@@ -83,12 +85,18 @@ class MeetupController {
 
     const meetup = await Meetup.findByPk(req.params.id);
 
+    if (!meetup) {
+      return res.status(401).json({ error: 'Meetup não encontrado' });
+    }
+
     if (meetup.user_id !== user_id) {
-      return res.status(401).json({ error: 'Not authorized.' });
+      return res.status(401).json({ error: 'Usuário não autorizado' });
     }
 
     if (meetup.past) {
-      return res.status(400).json({ error: "Can't delete past meetups." });
+      return res
+        .status(400)
+        .json({ error: 'Não é possível apagar um meetup já realizado' });
     }
 
     await meetup.destroy();

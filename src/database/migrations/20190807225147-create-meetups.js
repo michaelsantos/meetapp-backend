@@ -30,7 +30,7 @@ module.exports = {
         onDelete: 'CASCADE',
         allowNull: false,
       },
-      file_id: {
+      banner_id: {
         type: Sequelize.INTEGER,
         references: { model: 'files', key: 'id' },
         onUpdate: 'CASCADE',

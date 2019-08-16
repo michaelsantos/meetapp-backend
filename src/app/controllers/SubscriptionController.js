@@ -16,6 +16,7 @@ class SubscriptionController {
       include: [
         {
           model: Meetup,
+          as: 'meetup',
           where: {
             date: {
               [Op.gt]: new Date(),
@@ -23,7 +24,7 @@ class SubscriptionController {
           },
         },
       ],
-      order: [['Meetup', 'date']],
+      order: [['meetup', 'date']],
     });
 
     return res.json(subscriptions);
@@ -33,19 +34,29 @@ class SubscriptionController {
     const user = await User.findByPk(req.userId);
 
     const meetup = await Meetup.findByPk(req.params.meetupId, {
-      include: [User],
+      include: [
+        {
+          model: User,
+          as: 'user',
+          attributes: ['name', 'email'],
+        },
+      ],
     });
 
+    if (!meetup) {
+      return res.status(400).json({ error: 'Meetup não encontrado' });
+    }
+
     if (meetup.user_id === req.userId) {
-      return res
-        .status(400)
-        .json({ error: "Can't subscribe to you own meetups." });
+      return res.status(400).json({
+        error: 'Não é possível se inscrever em seus próprios meetups',
+      });
     }
 
     if (meetup.past) {
       return res
         .status(400)
-        .json({ error: "Can't subscribe to past meetups." });
+        .json({ error: 'Não é possível se inscrever em meetups realizados' });
     }
 
     const checkDate = await Subscription.findOne({
@@ -55,6 +66,7 @@ class SubscriptionController {
       include: [
         {
           model: Meetup,
+          as: 'meetup',
           required: true,
           where: {
             date: meetup.date,
@@ -64,9 +76,9 @@ class SubscriptionController {
     });
 
     if (checkDate) {
-      return res
-        .status(400)
-        .json({ error: "Can't subscribe to two meetups at the same time." });
+      return res.status(400).json({
+        error: 'Não é possível se inscrever em dois meetup ao mesmo tempo',
+      });
     }
 
     const subscription = await Subscription.create({

@@ -9,6 +9,7 @@ class Meetup extends Model {
         description: Sequelize.STRING,
         location: Sequelize.STRING,
         date: Sequelize.DATE,
+        banner_id: Sequelize.INTEGER,
         past: {
           type: Sequelize.VIRTUAL,
           get() {
@@ -25,9 +26,12 @@ class Meetup extends Model {
   }
 
   static associate(models) {
-    this.hasMany(models.Subscription, { foreignKey: 'meetup_id' });
-    this.belongsTo(models.User, { foreignKey: 'user_id' });
-    this.belongsTo(models.File, { foreignKey: 'file_id' });
+    this.hasMany(models.Subscription, {
+      foreignKey: 'meetup_id',
+      as: 'subscription',
+    });
+    this.belongsTo(models.User, { foreignKey: 'user_id', as: 'user' });
+    this.belongsTo(models.File, { foreignKey: 'banner_id', as: 'banner' });
   }
 }
 

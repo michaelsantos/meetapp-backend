@@ -7,7 +7,7 @@ export default async (req, res, next) => {
       description: Yup.string(),
       location: Yup.string(),
       date: Yup.date(),
-      file_id: Yup.number(),
+      banner_id: Yup.number(),
     });
 
     await schema.validate(req.body, { abortEarly: false });
@@ -16,6 +16,6 @@ export default async (req, res, next) => {
   } catch (err) {
     return res
       .status(400)
-      .json({ error: 'Validation fails', messages: err.inner });
+      .json({ error: 'Ocorreu erros de validação', messages: err.inner });
   }
 };
