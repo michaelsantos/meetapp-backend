@@ -9,7 +9,7 @@ import SubscriptionMail from '../jobs/SubscriptionMail';
 
 class SubscriptionController {
   async index(req, res) {
-    const subscriptions = await Subscription.findAll({
+    const subscriptions = await Subscription.findAndCountAll({
       where: {
         user_id: req.userId,
       },
@@ -27,7 +27,9 @@ class SubscriptionController {
       order: [['meetup', 'date']],
     });
 
-    return res.json(subscriptions);
+    res.setHeader('X-Total-Count', subscriptions.count);
+
+    return res.json(subscriptions.rows);
   }
 
   async store(req, res) {
@@ -92,6 +94,45 @@ class SubscriptionController {
     });
 
     return res.json(subscription);
+  }
+
+  async delete(req, res) {
+    const user = await User.findByPk(req.userId);
+
+    const meetup = await Meetup.findByPk(req.params.meetupId, {
+      include: {
+        model: User,
+        as: 'user',
+        attributes: ['id'],
+      },
+    });
+
+    if (!meetup) {
+      return res.status(400).json({ error: 'Meetup não encontrado' });
+    }
+
+    const subscribed = await Subscription.findOne({
+      where: {
+        user_id: user.id,
+        meetup_id: meetup.id,
+      },
+    });
+
+    if (!subscribed) {
+      return res
+        .status(401)
+        .json({ error: 'Você não está inscrito nesse meetup' });
+    }
+
+    if (meetup.past) {
+      return res.status(401).json({
+        error: 'Não é possível cancelar inscrição de meetups realizados',
+      });
+    }
+
+    subscribed.destroy();
+
+    return res.send();
   }
 }
 

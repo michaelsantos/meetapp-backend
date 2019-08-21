@@ -3,6 +3,7 @@ import { isBefore, startOfDay, endOfDay, parseISO } from 'date-fns';
 
 import Meetup from '../models/Meetup';
 import User from '../models/User';
+import Subscription from '../models/Subscription';
 import File from '../models/File';
 
 class MeetupController {
@@ -18,9 +19,14 @@ class MeetupController {
       };
     }
 
-    const meetups = await Meetup.findAll({
+    const meetups = await Meetup.findAndCountAll({
       where,
       include: [
+        {
+          model: Subscription,
+          as: 'subscription',
+          attributes: ['user_id'],
+        },
         {
           model: User,
           as: 'user',
@@ -36,7 +42,9 @@ class MeetupController {
       offset: (page - 1) * 10,
     });
 
-    return res.json(meetups);
+    res.setHeader('x-total-count', meetups.count);
+
+    return res.json(meetups.rows);
   }
 
   async store(req, res) {
