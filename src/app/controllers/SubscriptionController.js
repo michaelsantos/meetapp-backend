@@ -40,7 +40,7 @@ class SubscriptionController {
       order: [['meetup', 'date']],
     });
 
-    res.setHeader('X-Total-Count', subscriptions.count);
+    res.setHeader('x-total-count', subscriptions.count);
 
     return res.json(subscriptions.rows);
   }
