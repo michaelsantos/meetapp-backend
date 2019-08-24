@@ -8,7 +8,9 @@ import File from '../models/File';
 
 class MeetupController {
   async index(req, res) {
-    const { page = 1, date } = req.query;
+    const page = req.query.page || 1;
+    const { date } = req.query;
+
     const where = {};
 
     if (date) {
@@ -38,8 +40,9 @@ class MeetupController {
           attributes: ['name', 'path', 'url'],
         },
       ],
-      limit: 2,
-      offset: (page - 1) * 2,
+      order: ['date'],
+      limit: 10,
+      offset: (page - 1) * 10,
     });
 
     res.setHeader('x-total-count', meetups.count);
