@@ -38,8 +38,8 @@ class MeetupController {
           attributes: ['name', 'path', 'url'],
         },
       ],
-      limit: 10,
-      offset: (page - 1) * 10,
+      limit: 2,
+      offset: (page - 1) * 2,
     });
 
     res.setHeader('x-total-count', meetups.count);
